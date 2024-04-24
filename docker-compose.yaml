@@ -1,0 +1,16 @@
+version: "3.6"
+
+# This docker-compose file sets up the postgres container to listen for requests
+# from your application. To make use of this, your application needs to be configured
+# for a local environment to send data requests to http://postgres:5432 when executing
+# from within the microservice-network in docker
+#
+
+services:
+  postgres:
+    image: postgres:11.7-alpine
+    ports:
+      - 5010:5432
+    environment:
+      POSTGRES_PASSWORD: p4ssw0rd-t3st3-db
+      
