@@ -27,7 +27,10 @@ export class UsersController {
     @Body() createStoreDto: CreateStoreDto,
     @Param('userId') userId: string,
   ) {
-    const store = await this.usersService.createStore({ ...createStoreDto, userId });
-    return { store }
+    const store = await this.usersService.createStore({
+      ...createStoreDto,
+      userId,
+    });
+    return { store };
   }
 }
