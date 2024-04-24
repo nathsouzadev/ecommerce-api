@@ -6,6 +6,7 @@ import { ConfigModule } from '@nestjs/config';
 import { router } from './config/router';
 import { StoreModule } from './store/store.module';
 import { UserModule } from './user/user.module';
+import { HealthModule } from './health/health.module';
 
 @Module({
   imports: [
@@ -17,6 +18,7 @@ import { UserModule } from './user/user.module';
     RouterModule.register(router),
     StoreModule,
     UserModule,
+    HealthModule,
   ],
 })
 export class AppModule {}

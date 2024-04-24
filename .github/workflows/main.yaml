@@ -82,7 +82,7 @@ jobs:
         run: docker ps -a
 
       - name: Install dependencies
-        run: npm run install
+        run: npm install
 
       - name: Create tables
         run: npx prisma migrate dev --name ci --schema=./src/config/prisma/schema.prisma
@@ -91,4 +91,4 @@ jobs:
         run: npm run seed:db
 
       - name: Running integration tests
-        run: npm run test:integration
+        run: npm run test:e2e
