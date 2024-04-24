@@ -91,4 +91,4 @@ jobs:
         run: npm run seed:db
 
       - name: Running integration tests
-        run: npm run test:integration
+        run: npm run test:e2e
