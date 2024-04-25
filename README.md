@@ -11,7 +11,7 @@ Service with [Nest](https://github.com/nestjs/nest) to provide data to ecommerce
 3 - Install all dependecies and setup database
 
 ```bash
-$ npm install
+$ npm install --legacy-peer-deps
 
 $ npm run local
 ```
