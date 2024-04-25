@@ -1,7 +1,11 @@
 import { Controller, Post, Body, Param, Get } from '@nestjs/common';
 import { UserService } from './service/user.service';
 import { CreateStoreDto } from '../store/dto/create-store.dto';
-import { ApiCreatedResponse, ApiOkResponse } from '@nestjs/swagger';
+import {
+  ApiCreatedResponse,
+  ApiNotFoundResponse,
+  ApiOkResponse,
+} from '@nestjs/swagger';
 import { randomUUID } from 'crypto';
 
 @Controller()
@@ -45,6 +49,15 @@ export class UsersController {
           createdAt: new Date().toISOString(),
           updatedAt: new Date().toISOString(),
         },
+      },
+    },
+  })
+  @ApiNotFoundResponse({
+    description: 'Store not found',
+    schema: {
+      example: {
+        statusCode: 404,
+        message: 'Store not found',
       },
     },
   })
