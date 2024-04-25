@@ -9,4 +9,7 @@ export class UserService {
 
   createStore = async (newStore: NewStoreModel): Promise<Store> =>
     this.storeService.create(newStore);
+
+  getStore = async (userId: string, storeId: string): Promise<Store> =>
+    this.storeService.get(userId, storeId);
 }
