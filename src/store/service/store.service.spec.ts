@@ -2,6 +2,7 @@ import { Test, TestingModule } from '@nestjs/testing';
 import { StoreService } from './store.service';
 import { randomUUID } from 'crypto';
 import { StoreRepository } from '../repository/store.repository';
+import { NotFoundException } from '@nestjs/common';
 
 describe('StoreService', () => {
   let service: StoreService;
@@ -15,6 +16,7 @@ describe('StoreService', () => {
           provide: StoreRepository,
           useValue: {
             create: jest.fn(),
+            get: jest.fn(),
           },
         },
       ],
@@ -47,5 +49,37 @@ describe('StoreService', () => {
       createdAt: expect.any(String),
       updatedAt: expect.any(String),
     });
+  });
+
+  it('get store by id and userId', async () => {
+    const userId = randomUUID();
+    const storeId = randomUUID();
+    const mockStore = {
+      id: storeId,
+      name: 'Store',
+      userId,
+      createdAt: new Date().toISOString(),
+      updatedAt: new Date().toISOString(),
+    };
+
+    jest
+      .spyOn<any, any>(mockStoreRepository, 'get')
+      .mockImplementation(() => Promise.resolve(mockStore));
+
+    const store = await service.get(storeId, userId);
+    expect(store).toMatchObject(mockStore);
+  });
+
+  it('throw error if not found', async () => {
+    const userId = randomUUID();
+    const storeId = randomUUID();
+
+    jest
+      .spyOn<any, any>(mockStoreRepository, 'get')
+      .mockImplementation(() => Promise.resolve(null));
+
+    await expect(service.get(userId, storeId)).rejects.toThrow(
+      new NotFoundException('Store not found'),
+    );
   });
 });
