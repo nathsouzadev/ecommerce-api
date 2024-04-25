@@ -24,7 +24,6 @@ describe('StoreController (e2e)', () => {
       .send({ name: 'store1' })
       .expect(201)
       .then(async (response) => {
-        console.log(response.body);
         expect(response.body).toMatchObject({
           store: {
             id: expect.any(String),
@@ -32,14 +31,14 @@ describe('StoreController (e2e)', () => {
             userId,
             createdAt: expect.any(String),
             updatedAt: expect.any(String),
-          }
+          },
         });
 
         await prismadb.store.delete({
           where: {
-            id: response.body.store.id
-          }
-        })
+            id: response.body.store.id,
+          },
+        });
       });
   });
 });
