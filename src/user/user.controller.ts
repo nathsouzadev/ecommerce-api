@@ -56,4 +56,5 @@ export class UsersController {
     const store = await this.usersService.getStore(userId, storeId);
 
     return { store };
+  }
 }
