@@ -10,4 +10,7 @@ export class PrismaStoreRepository implements StoreRepository {
 
   create = async (newStore: NewStoreModel): Promise<Store> =>
     this.prisma.store.create({ data: newStore });
+
+  get = async (userId: string, storeId: string): Promise<Store> =>
+    this.prisma.store.findFirst({ where: { id: storeId, userId } });
 }
