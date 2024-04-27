@@ -68,7 +68,7 @@ describe('StoreService', () => {
       .spyOn<any, any>(mockStoreRepository, 'get')
       .mockImplementation(() => Promise.resolve(mockStore));
 
-    const store = await service.get(storeId, userId);
+    const store = await service.get(userId, storeId);
     expect(store).toMatchObject(mockStore);
   });
 
