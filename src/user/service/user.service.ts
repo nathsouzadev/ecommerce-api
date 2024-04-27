@@ -12,4 +12,7 @@ export class UserService {
 
   getStore = async (userId: string, storeId: string): Promise<Store> =>
     this.storeService.get(userId, storeId);
+
+  getStoreByUserId = async (userId: string): Promise<Store> =>
+    this.storeService.getByUserId(userId);
 }

@@ -17,6 +17,7 @@ describe('StoreService', () => {
           useValue: {
             create: jest.fn(),
             get: jest.fn(),
+            getByUserId: jest.fn(),
           },
         },
       ],
@@ -79,6 +80,36 @@ describe('StoreService', () => {
       .mockImplementation(() => Promise.resolve(null));
 
     await expect(service.get(userId, storeId)).rejects.toThrow(
+      new NotFoundException('Store not found'),
+    );
+  });
+
+  it('get store by userId', async () => {
+    const userId = randomUUID();
+    const mockStore = {
+      id: randomUUID(),
+      name: 'Store',
+      userId,
+      createdAt: new Date().toISOString(),
+      updatedAt: new Date().toISOString(),
+    };
+
+    jest
+      .spyOn<any, any>(mockStoreRepository, 'getByUserId')
+      .mockImplementation(() => Promise.resolve(mockStore));
+
+    const store = await service.getByUserId(userId);
+    expect(store).toMatchObject(mockStore);
+  });
+
+  it('throw error user does not have store', async () => {
+    const userId = randomUUID();
+
+    jest
+      .spyOn<any, any>(mockStoreRepository, 'getByUserId')
+      .mockImplementation(() => Promise.resolve(null));
+
+    await expect(service.getByUserId(userId)).rejects.toThrow(
       new NotFoundException('Store not found'),
     );
   });

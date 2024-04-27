@@ -70,4 +70,34 @@ export class UsersController {
 
     return { store };
   }
+
+  @ApiOkResponse({
+    description: 'Store found',
+    schema: {
+      example: {
+        store: {
+          id: randomUUID(),
+          name: 'Store Name',
+          userId: randomUUID(),
+          createdAt: new Date().toISOString(),
+          updatedAt: new Date().toISOString(),
+        },
+      },
+    },
+  })
+  @ApiNotFoundResponse({
+    description: 'Store not found',
+    schema: {
+      example: {
+        statusCode: 404,
+        message: 'Store not found',
+      },
+    },
+  })
+  @Get(':userId/store')
+  async getStoreByUser(@Param('userId') userId: string) {
+    const store = await this.usersService.getStoreByUserId(userId);
+
+    return { store };
+  }
 }

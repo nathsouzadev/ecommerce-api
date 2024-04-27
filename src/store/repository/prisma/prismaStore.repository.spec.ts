@@ -78,4 +78,26 @@ describe('PrismaStoreRepository', () => {
     });
     expect(store).toMatchObject(mockStore);
   });
+
+  it('should find store by userId', async () => {
+    const mockUserId = randomUUID();
+    const mockStore = {
+      id: randomUUID(),
+      name: 'Store',
+      userId: mockUserId,
+      createdAt: new Date().toISOString(),
+      updatedAt: new Date().toISOString(),
+    };
+    jest
+      .spyOn<any, any>(mockPrismaService.store, 'findFirst')
+      .mockImplementation(() => Promise.resolve(mockStore));
+
+    const store = await repository.getByUserId(mockUserId);
+    expect(mockPrismaService.store.findFirst).toHaveBeenCalledWith({
+      where: {
+        userId: mockUserId,
+      },
+    });
+    expect(store).toMatchObject(mockStore);
+  });
 });

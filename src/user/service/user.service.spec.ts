@@ -16,6 +16,7 @@ describe('UsersService', () => {
           useValue: {
             create: jest.fn(),
             get: jest.fn(),
+            getByUserId: jest.fn(),
           },
         },
       ],
@@ -67,6 +68,25 @@ describe('UsersService', () => {
 
     const store = await service.getStore(userId, storeId);
     expect(mockStoreService.get).toHaveBeenCalledWith(userId, storeId);
+    expect(store).toMatchObject(mockStore);
+  });
+
+  it('should get store by userId', async () => {
+    const userId = randomUUID();
+    const mockStore = {
+      id: randomUUID(),
+      name: 'Store',
+      userId,
+      createdAt: new Date().toISOString(),
+      updatedAt: new Date().toISOString(),
+    };
+
+    jest
+      .spyOn<any, any>(mockStoreService, 'getByUserId')
+      .mockImplementation(() => Promise.resolve(mockStore));
+
+    const store = await service.getStoreByUserId(userId);
+    expect(mockStoreService.getByUserId).toHaveBeenCalledWith(userId);
     expect(store).toMatchObject(mockStore);
   });
 });
