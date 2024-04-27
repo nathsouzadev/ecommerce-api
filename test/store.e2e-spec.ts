@@ -88,4 +88,51 @@ describe('StoreController (e2e)', () => {
         });
       });
   });
+
+  it('get store by userId', async () => {
+    const userId = randomUUID();
+    const store = await prismadb.store.create({
+      data: {
+        id: randomUUID(),
+        name: 'store',
+        userId,
+        createdAt: new Date(),
+        updatedAt: new Date(),
+      },
+    });
+
+    return request(app.getHttpServer())
+      .get(`/api/user/${userId}/store`)
+      .expect(200)
+      .then(async (response) => {
+        expect(response.body).toMatchObject({
+          store: {
+            id: store.id,
+            name: 'store',
+            userId,
+            createdAt: store.createdAt.toISOString(),
+            updatedAt: store.updatedAt.toISOString(),
+          },
+        });
+
+        await prismadb.store.delete({
+          where: {
+            id: store.id,
+          },
+        });
+      });
+  });
+
+  it('return 404 if store not found by userId', async () => {
+    const userId = randomUUID();
+    return request(app.getHttpServer())
+      .get(`/api/user/${userId}/store`)
+      .expect(404)
+      .then(async (response) => {
+        expect(response.body).toMatchObject({
+          statusCode: 404,
+          message: 'Store not found',
+        });
+      });
+  });
 });

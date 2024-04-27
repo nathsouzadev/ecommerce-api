@@ -18,4 +18,14 @@ export class StoreService {
 
     return store;
   };
+
+  getByUserId = async (userId: string): Promise<Store> => {
+    const store = await this.storeRepository.getByUserId(userId);
+
+    if (!store) {
+      throw new NotFoundException('Store not found');
+    }
+
+    return store;
+  };
 }

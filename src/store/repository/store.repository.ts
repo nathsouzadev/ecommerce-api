@@ -5,4 +5,6 @@ export abstract class StoreRepository {
   create: (newStore: NewStoreModel) => Promise<Store>;
 
   get: (userId: string, storeId: string) => Promise<Store>;
+
+  getByUserId: (userId: string) => Promise<Store>;
 }
