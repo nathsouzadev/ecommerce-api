@@ -15,4 +15,7 @@ export class UserService {
 
   getStoreByUserId = async (userId: string): Promise<Store> =>
     this.storeService.getByUserId(userId);
+
+  getAllUserStores = async (userId: string): Promise<Store[]> =>
+    this.storeService.getAllUserStores(userId);
 }

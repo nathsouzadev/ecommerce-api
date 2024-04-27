@@ -7,4 +7,6 @@ export abstract class StoreRepository {
   get: (userId: string, storeId: string) => Promise<Store>;
 
   getByUserId: (userId: string) => Promise<Store>;
+
+  getAllUserStores: (userId: string) => Promise<Store[]>;
 }

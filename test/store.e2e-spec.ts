@@ -135,4 +135,53 @@ describe('StoreController (e2e)', () => {
         });
       });
   });
+
+  it('should return all stores with userId', async () => {
+    const mockUserId = 'user_5fYgThng9k3ZvaPI7g9fRWOYrWi';
+    const mockStores = Array.from({ length: 3 }, (_, index) => ({
+      id: randomUUID(),
+      name: `Store ${index + 1}`,
+      userId: mockUserId,
+      createdAt: new Date().toISOString(),
+      updatedAt: new Date().toISOString(),
+    }));
+
+    for (const store of mockStores) {
+      await prismadb.store.create({
+        data: store,
+      });
+    }
+
+    const mockStoreIds = mockStores.map((store) => store.id);
+
+    return request(app.getHttpServer())
+      .get(`/api/user/${mockUserId}/stores`)
+      .expect(200)
+      .then(async (response) => {
+        expect(response.body).toMatchObject({
+          stores: mockStores,
+        });
+
+        await prismadb.store.deleteMany({
+          where: {
+            id: {
+              in: mockStoreIds,
+            },
+          },
+        });
+      });
+  });
+
+  it('should return 404 if user does not have store', async () => {
+    const userId = randomUUID();
+    return request(app.getHttpServer())
+      .get(`/api/user/${userId}/stores`)
+      .expect(404)
+      .then(async (response) => {
+        expect(response.body).toMatchObject({
+          statusCode: 404,
+          message: 'Stores not found',
+        });
+      });
+  });
 });

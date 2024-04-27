@@ -17,6 +17,7 @@ describe('UsersService', () => {
             create: jest.fn(),
             get: jest.fn(),
             getByUserId: jest.fn(),
+            getAllUserStores: jest.fn(),
           },
         },
       ],
@@ -88,5 +89,24 @@ describe('UsersService', () => {
     const store = await service.getStoreByUserId(userId);
     expect(mockStoreService.getByUserId).toHaveBeenCalledWith(userId);
     expect(store).toMatchObject(mockStore);
+  });
+
+  it('should get all user stores', async () => {
+    const mockUserId = 'user_2fYgThng9k3ZvaPI7g9fRWOYrWi';
+    const mockStores = Array.from({ length: 3 }, (_, index) => ({
+      id: randomUUID(),
+      name: `Store ${index + 1}`,
+      userId: mockUserId,
+      createdAt: new Date().toISOString(),
+      updatedAt: new Date().toISOString(),
+    }));
+
+    jest
+      .spyOn<any, any>(mockStoreService, 'getAllUserStores')
+      .mockImplementation(() => Promise.resolve(mockStores));
+
+    const stores = await service.getAllUserStores(mockUserId);
+    expect(mockStoreService.getAllUserStores).toHaveBeenCalledWith(mockUserId);
+    expect(stores).toMatchObject(mockStores);
   });
 });

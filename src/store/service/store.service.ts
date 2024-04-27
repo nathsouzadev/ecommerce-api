@@ -28,4 +28,14 @@ export class StoreService {
 
     return store;
   };
+
+  getAllUserStores = async (userId: string): Promise<Store[]> => {
+    const stores = await this.storeRepository.getAllUserStores(userId);
+
+    if (stores.length === 0) {
+      throw new NotFoundException('Stores not found');
+    }
+
+    return stores;
+  };
 }
