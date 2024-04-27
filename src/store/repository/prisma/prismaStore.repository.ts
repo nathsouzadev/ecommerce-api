@@ -16,4 +16,8 @@ export class PrismaStoreRepository implements StoreRepository {
 
   getByUserId = async (userId: string): Promise<Store> =>
     this.prisma.store.findFirst({ where: { userId } });
+
+  getAllUserStores = async (userId: string): Promise<Store[]> => {
+    return this.prisma.store.findMany({ where: { userId } });
+  };
 }

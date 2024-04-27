@@ -100,4 +100,34 @@ export class UsersController {
 
     return { store };
   }
+
+  @ApiOkResponse({
+    description: 'Get all stores of with userId',
+    schema: {
+      example: {
+        stores: Array.from({ length: 3 }, (_, index) => ({
+          id: randomUUID(),
+          name: `Store ${index + 1}`,
+          userId: 'user_2fYgThng9k3ZvaPI7g9fRWOYrWi',
+          createdAt: new Date().toISOString(),
+          updatedAt: new Date().toISOString(),
+        })),
+      },
+    },
+  })
+  @ApiNotFoundResponse({
+    description: 'Store not found',
+    schema: {
+      example: {
+        statusCode: 404,
+        message: 'Store not found',
+      },
+    },
+  })
+  @Get(':userId/stores')
+  async getStoresByUser(@Param('userId') userId: string) {
+    const stores = await this.usersService.getAllUserStores(userId);
+
+    return { stores };
+  }
 }
