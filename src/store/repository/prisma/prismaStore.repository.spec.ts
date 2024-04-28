@@ -18,6 +18,7 @@ describe('PrismaStoreRepository', () => {
               create: jest.fn(),
               findFirst: jest.fn(),
               findMany: jest.fn(),
+              update: jest.fn(),
             },
           },
         },
@@ -122,5 +123,37 @@ describe('PrismaStoreRepository', () => {
       },
     });
     expect(stores).toMatchObject(mockStores);
+  });
+
+  it('should update store by id and userId', async () => {
+    const mockStoreId = randomUUID();
+    const mockUserId = randomUUID();
+    const mockNewStoreName = 'New Store Name';
+    const mockStore = {
+      id: mockStoreId,
+      name: mockNewStoreName,
+      userId: mockUserId,
+      createdAt: new Date().toISOString(),
+      updatedAt: new Date().toISOString(),
+    };
+    jest
+      .spyOn<any, any>(mockPrismaService.store, 'update')
+      .mockImplementation(() => Promise.resolve(mockStore));
+
+    const store = await repository.update(
+      mockUserId,
+      mockStoreId,
+      mockNewStoreName,
+    );
+    expect(mockPrismaService.store.update).toHaveBeenCalledWith({
+      where: {
+        id: mockStoreId,
+        userId: mockUserId,
+      },
+      data: {
+        name: mockNewStoreName,
+      },
+    });
+    expect(store).toMatchObject(mockStore);
   });
 });

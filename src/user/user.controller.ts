@@ -1,4 +1,4 @@
-import { Controller, Post, Body, Param, Get } from '@nestjs/common';
+import { Controller, Post, Body, Param, Get, Patch } from '@nestjs/common';
 import { UserService } from './service/user.service';
 import { CreateStoreDto } from '../store/dto/create-store.dto';
 import {
@@ -7,6 +7,7 @@ import {
   ApiOkResponse,
 } from '@nestjs/swagger';
 import { randomUUID } from 'crypto';
+import { UpdateStoreDto } from '../store/dto/update-store.dto';
 
 @Controller()
 export class UsersController {
@@ -129,5 +130,43 @@ export class UsersController {
     const stores = await this.usersService.getAllUserStores(userId);
 
     return { stores };
+  }
+
+  @ApiOkResponse({
+    description: 'Get all stores of with userId',
+    schema: {
+      example: {
+        store: {
+          id: randomUUID(),
+          name: 'Store Name Updated',
+          userId: randomUUID(),
+          createdAt: new Date().toISOString(),
+          updatedAt: new Date().toISOString(),
+        },
+      },
+    },
+  })
+  @ApiNotFoundResponse({
+    description: 'Store not found',
+    schema: {
+      example: {
+        statusCode: 404,
+        message: 'Store not found',
+      },
+    },
+  })
+  @Patch(':userId/store/:storeId')
+  async updateStore(
+    @Body() updateStoreDto: UpdateStoreDto,
+    @Param('userId') userId: string,
+    @Param('storeId') storeId: string,
+  ) {
+    const store = await this.usersService.updateStore(
+      userId,
+      storeId,
+      updateStoreDto.name,
+    );
+
+    return { store };
   }
 }
