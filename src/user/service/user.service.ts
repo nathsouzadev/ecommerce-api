@@ -18,4 +18,10 @@ export class UserService {
 
   getAllUserStores = async (userId: string): Promise<Store[]> =>
     this.storeService.getAllUserStores(userId);
+
+  updateStore = async (
+    userId: string,
+    storeId: string,
+    name: string,
+  ): Promise<Store> => this.storeService.update(userId, storeId, name);
 }

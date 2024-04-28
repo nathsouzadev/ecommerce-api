@@ -184,4 +184,53 @@ describe('StoreController (e2e)', () => {
         });
       });
   });
+
+  it('should update store with new name', async () => {
+    const userId = randomUUID();
+    const mockStoreId = randomUUID();
+    await prismadb.store.create({
+      data: {
+        id: mockStoreId,
+        name: 'Store Name',
+        userId,
+        createdAt: new Date(),
+        updatedAt: new Date(),
+      },
+    });
+
+    return request(app.getHttpServer())
+      .patch(`/api/user/${userId}/store/${mockStoreId}`)
+      .send({ name: 'Store Name Updated' })
+      .expect(200)
+      .then(async (response) => {
+        expect(response.body).toMatchObject({
+          store: {
+            id: mockStoreId,
+            name: 'Store Name Updated',
+            userId,
+            createdAt: expect.any(String),
+            updatedAt: expect.any(String),
+          },
+        });
+
+        await prismadb.store.delete({
+          where: {
+            id: mockStoreId,
+          },
+        });
+      });
+  });
+
+  it('should return 404 if try update store does not exists', async () => {
+    const userId = randomUUID();
+    return request(app.getHttpServer())
+      .patch(`/api/user/${userId}/store/${randomUUID()}`)
+      .expect(404)
+      .then(async (response) => {
+        expect(response.body).toMatchObject({
+          statusCode: 404,
+          message: 'Store not found',
+        });
+      });
+  });
 });

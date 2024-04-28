@@ -38,4 +38,18 @@ export class StoreService {
 
     return stores;
   };
+
+  update = async (
+    userId: string,
+    storeId: string,
+    name: string,
+  ): Promise<Store> => {
+    const store = await this.storeRepository.get(userId, storeId);
+
+    if (!store) {
+      throw new NotFoundException('Store not found');
+    }
+
+    return this.storeRepository.update(userId, storeId, name);
+  };
 }

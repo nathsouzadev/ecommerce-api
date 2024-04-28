@@ -20,4 +20,17 @@ export class PrismaStoreRepository implements StoreRepository {
   getAllUserStores = async (userId: string): Promise<Store[]> => {
     return this.prisma.store.findMany({ where: { userId } });
   };
+
+  update = async (
+    userId: string,
+    storeId: string,
+    name: string,
+  ): Promise<Store> =>
+    this.prisma.store.update({
+      where: {
+        id: storeId,
+        userId,
+      },
+      data: { name },
+    });
 }

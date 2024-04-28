@@ -19,6 +19,7 @@ describe('StoreService', () => {
             get: jest.fn(),
             getByUserId: jest.fn(),
             getAllUserStores: jest.fn(),
+            update: jest.fn(),
           },
         },
       ],
@@ -143,5 +144,43 @@ describe('StoreService', () => {
     await expect(service.getAllUserStores(mockUserId)).rejects.toThrow(
       new NotFoundException('Stores not found'),
     );
+  });
+
+  it('update store name', async () => {
+    const userId = randomUUID();
+    const storeId = randomUUID();
+    const storeName = 'Store Name';
+    const mockStore = {
+      id: storeId,
+      name: storeName,
+      userId,
+      createdAt: new Date().toISOString(),
+      updatedAt: new Date().toISOString(),
+    };
+
+    jest
+      .spyOn<any, any>(mockStoreRepository, 'get')
+      .mockImplementation(() => Promise.resolve(mockStore));
+
+    jest
+      .spyOn<any, any>(mockStoreRepository, 'update')
+      .mockImplementation(() => Promise.resolve(mockStore));
+
+    const store = await service.update(userId, storeId, storeName);
+    expect(store).toMatchObject(mockStore);
+  });
+
+  it('throw error if try update stores does not exists', async () => {
+    const mockUserId = 'user_2fYgThng9k3ZvaPI7g9fRWOYrWi';
+    const mockStoreId = randomUUID();
+    const mockStoreName = 'Store Name';
+
+    jest
+      .spyOn<any, any>(mockStoreRepository, 'update')
+      .mockImplementation(() => Promise.resolve([]));
+
+    await expect(
+      service.update(mockUserId, mockStoreId, mockStoreName),
+    ).rejects.toThrow(new NotFoundException('Store not found'));
   });
 });
