@@ -2,6 +2,7 @@ import { Injectable, NotFoundException } from '@nestjs/common';
 import { NewStoreModel } from '../model/new-store.model';
 import { StoreRepository } from '../repository/store.repository';
 import { Store } from '@prisma/client';
+import { DeletedStoreModel } from '../model/deleted-store.model';
 
 @Injectable()
 export class StoreService {
@@ -51,5 +52,18 @@ export class StoreService {
     }
 
     return this.storeRepository.update(userId, storeId, name);
+  };
+
+  delete = async (
+    userId: string,
+    storeId: string,
+  ): Promise<DeletedStoreModel> => {
+    try {
+      const store = await this.storeRepository.delete(userId, storeId);
+      return { deleted: { store } };
+    } catch (error) {
+      console.log(error);
+      throw new NotFoundException(error.meta.cause);
+    }
   };
 }

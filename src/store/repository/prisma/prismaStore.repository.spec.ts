@@ -19,6 +19,7 @@ describe('PrismaStoreRepository', () => {
               findFirst: jest.fn(),
               findMany: jest.fn(),
               update: jest.fn(),
+              delete: jest.fn(),
             },
           },
         },
@@ -152,6 +153,30 @@ describe('PrismaStoreRepository', () => {
       },
       data: {
         name: mockNewStoreName,
+      },
+    });
+    expect(store).toMatchObject(mockStore);
+  });
+
+  it('should delete store', async () => {
+    const mockStoreId = randomUUID();
+    const mockUserId = randomUUID();
+    const mockStore = {
+      id: mockStoreId,
+      name: 'Store name',
+      userId: mockUserId,
+      createdAt: new Date().toISOString(),
+      updatedAt: new Date().toISOString(),
+    };
+    jest
+      .spyOn<any, any>(mockPrismaService.store, 'delete')
+      .mockImplementation(() => Promise.resolve(mockStore));
+
+    const store = await repository.delete(mockUserId, mockStoreId);
+    expect(mockPrismaService.store.delete).toHaveBeenCalledWith({
+      where: {
+        id: mockStoreId,
+        userId: mockUserId,
       },
     });
     expect(store).toMatchObject(mockStore);

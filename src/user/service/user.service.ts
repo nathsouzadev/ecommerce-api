@@ -2,6 +2,7 @@ import { Injectable } from '@nestjs/common';
 import { StoreService } from '../../store/service/store.service';
 import { NewStoreModel } from '../../store/model/new-store.model';
 import { Store } from '@prisma/client';
+import { DeletedStoreModel } from '../../store/model/deleted-store.model';
 
 @Injectable()
 export class UserService {
@@ -24,4 +25,9 @@ export class UserService {
     storeId: string,
     name: string,
   ): Promise<Store> => this.storeService.update(userId, storeId, name);
+
+  deleteStore = async (
+    userId: string,
+    storeId: string,
+  ): Promise<DeletedStoreModel> => this.storeService.delete(userId, storeId);
 }

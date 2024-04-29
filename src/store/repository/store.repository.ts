@@ -11,4 +11,6 @@ export abstract class StoreRepository {
   getAllUserStores: (userId: string) => Promise<Store[]>;
 
   update: (userId: string, storeId: string, name: string) => Promise<Store>;
+
+  delete: (userId: string, storeId: string) => Promise<Store>;
 }

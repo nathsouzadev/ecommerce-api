@@ -20,6 +20,7 @@ describe('StoreService', () => {
             getByUserId: jest.fn(),
             getAllUserStores: jest.fn(),
             update: jest.fn(),
+            delete: jest.fn(),
           },
         },
       ],
@@ -182,5 +183,45 @@ describe('StoreService', () => {
     await expect(
       service.update(mockUserId, mockStoreId, mockStoreName),
     ).rejects.toThrow(new NotFoundException('Store not found'));
+  });
+
+  it('should delete store', async () => {
+    const userId = randomUUID();
+    const storeId = randomUUID();
+    const mockStore = {
+      id: storeId,
+      name: 'Store Name',
+      userId,
+      createdAt: new Date().toISOString(),
+      updatedAt: new Date().toISOString(),
+    };
+
+    jest
+      .spyOn<any, any>(mockStoreRepository, 'delete')
+      .mockImplementation(() => Promise.resolve(mockStore));
+
+    const store = await service.delete(userId, storeId);
+    expect(store).toMatchObject({ deleted: { store: mockStore } });
+  });
+
+  it('throw error if try delete stores does not exists', async () => {
+    const mockUserId = 'user_2fYgThng9k3ZvaPI7g9fRWOYrWi';
+    const mockStoreId = randomUUID();
+
+    jest.spyOn<any, any>(mockStoreRepository, 'delete').mockImplementation(() =>
+      Promise.reject({
+        clientVersion: '5.13.0',
+        code: 'P2025',
+        meta: {
+          cause: 'Record to delete does not exist.',
+          modelName: 'Store',
+        },
+        name: 'PrismaClientKnownRequestError',
+      }),
+    );
+
+    await expect(service.delete(mockUserId, mockStoreId)).rejects.toThrow(
+      new NotFoundException('Record to delete does not exist.'),
+    );
   });
 });
