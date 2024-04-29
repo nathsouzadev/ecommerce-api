@@ -233,4 +233,48 @@ describe('StoreController (e2e)', () => {
         });
       });
   });
+
+  it('should delete store', async () => {
+    const userId = randomUUID();
+    const storeId = randomUUID();
+    await prismadb.store.create({
+      data: {
+        id: storeId,
+        name: 'Store Name',
+        userId,
+        createdAt: new Date(),
+        updatedAt: new Date(),
+      },
+    });
+
+    return request(app.getHttpServer())
+      .delete(`/api/user/${userId}/store/${storeId}`)
+      .expect(200)
+      .then(async (response) => {
+        expect(response.body).toMatchObject({
+          deleted: {
+            store: {
+              id: storeId,
+              name: 'Store Name',
+              userId,
+              createdAt: expect.any(String),
+              updatedAt: expect.any(String),
+            },
+          },
+        });
+      });
+  });
+
+  it.only('should return 404 if try delete store does not exists', async () => {
+    const userId = randomUUID();
+    return request(app.getHttpServer())
+      .delete(`/api/user/${userId}/store/${randomUUID()}`)
+      .expect(404)
+      .then(async (response) => {
+        expect(response.body).toMatchObject({
+          statusCode: 404,
+          message: 'Record to delete does not exist.',
+        });
+      });
+  });
 });

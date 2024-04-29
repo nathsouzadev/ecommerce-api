@@ -1,4 +1,12 @@
-import { Controller, Post, Body, Param, Get, Patch } from '@nestjs/common';
+import {
+  Controller,
+  Post,
+  Body,
+  Param,
+  Get,
+  Patch,
+  Delete,
+} from '@nestjs/common';
 import { UserService } from './service/user.service';
 import { CreateStoreDto } from '../store/dto/create-store.dto';
 import {
@@ -133,7 +141,7 @@ export class UsersController {
   }
 
   @ApiOkResponse({
-    description: 'Get all stores of with userId',
+    description: 'Return store updated',
     schema: {
       example: {
         store: {
@@ -168,5 +176,40 @@ export class UsersController {
     );
 
     return { store };
+  }
+
+  @ApiOkResponse({
+    description: 'Return store deleted',
+    schema: {
+      example: {
+        deleted: {
+          store: {
+            id: randomUUID(),
+            name: 'Store Name',
+            userId: randomUUID(),
+            createdAt: new Date().toISOString(),
+            updatedAt: new Date().toISOString(),
+          },
+        },
+      },
+    },
+  })
+  @ApiNotFoundResponse({
+    description: 'Store not found',
+    schema: {
+      example: {
+        statusCode: 404,
+        message: 'Store not found',
+      },
+    },
+  })
+  @Delete(':userId/store/:storeId')
+  async deleteStore(
+    @Param('userId') userId: string,
+    @Param('storeId') storeId: string,
+  ) {
+    const store = await this.usersService.deleteStore(userId, storeId);
+
+    return store;
   }
 }

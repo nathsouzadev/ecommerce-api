@@ -33,4 +33,7 @@ export class PrismaStoreRepository implements StoreRepository {
       },
       data: { name },
     });
+
+  delete = async (userId: string, storeId: string): Promise<Store> =>
+    this.prisma.store.delete({ where: { id: storeId, userId } });
 }

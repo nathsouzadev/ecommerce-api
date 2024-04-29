@@ -19,6 +19,7 @@ describe('UsersService', () => {
             getByUserId: jest.fn(),
             getAllUserStores: jest.fn(),
             update: jest.fn(),
+            delete: jest.fn(),
           },
         },
       ],
@@ -138,5 +139,26 @@ describe('UsersService', () => {
       createdAt: expect.any(String),
       updatedAt: expect.any(String),
     });
+  });
+
+  it('should delete store', async () => {
+    const userId = randomUUID();
+    const storeId = randomUUID();
+    const mockStore = {
+      id: storeId,
+      name: 'Store',
+      userId,
+      createdAt: new Date().toISOString(),
+      updatedAt: new Date().toISOString(),
+    };
+    jest
+      .spyOn<any, any>(mockStoreService, 'delete')
+      .mockImplementation(() =>
+        Promise.resolve({ deleted: { store: mockStore } }),
+      );
+
+    const store = await service.deleteStore(userId, storeId);
+    expect(mockStoreService.delete).toHaveBeenCalledWith(userId, storeId);
+    expect(store).toMatchObject({ deleted: { store: mockStore } });
   });
 });
