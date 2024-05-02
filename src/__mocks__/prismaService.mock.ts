@@ -2,7 +2,8 @@ import { Store } from '@prisma/client';
 import { randomUUID } from 'crypto';
 
 export class MockPrismaService {
-  db: Store[] = [];
+  private db: Store[] = [];
+  reset = () => this.db = [];
   store = {
     create: (args: { data: { name: string; userId: string; id?: string } }) => {
       const store = {
