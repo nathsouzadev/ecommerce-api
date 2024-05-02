@@ -2,10 +2,11 @@ import { Test, TestingModule } from '@nestjs/testing';
 import { randomUUID } from 'crypto';
 import { PrismaStoreRepository } from './prismaStore.repository';
 import { PrismaService } from '../../../config/prisma/prisma.service';
+import { MockPrismaService } from '../../../__mocks__/prismaService.mock';
 
 describe('PrismaStoreRepository', () => {
   let repository: PrismaStoreRepository;
-  let mockPrismaService: PrismaService;
+  let mockPrismaService: PrismaService = new MockPrismaService() as any;
 
   beforeEach(async () => {
     const module: TestingModule = await Test.createTestingModule({
@@ -13,15 +14,7 @@ describe('PrismaStoreRepository', () => {
         PrismaStoreRepository,
         {
           provide: PrismaService,
-          useValue: {
-            store: {
-              create: jest.fn(),
-              findFirst: jest.fn(),
-              findMany: jest.fn(),
-              update: jest.fn(),
-              delete: jest.fn(),
-            },
-          },
+          useValue: mockPrismaService,
         },
       ],
     }).compile();
@@ -35,16 +28,7 @@ describe('PrismaStoreRepository', () => {
       name: 'Store',
       userId: randomUUID(),
     };
-    jest
-      .spyOn<any, any>(mockPrismaService.store, 'create')
-      .mockImplementation(() =>
-        Promise.resolve({
-          ...mockNewStore,
-          id: randomUUID(),
-          createdAt: new Date().toISOString(),
-          updatedAt: new Date().toISOString(),
-        }),
-      );
+    jest.spyOn<any, any>(mockPrismaService.store, 'create');
 
     const store = await repository.create(mockNewStore);
     expect(mockPrismaService.store.create).toHaveBeenCalledWith({
@@ -56,6 +40,7 @@ describe('PrismaStoreRepository', () => {
       createdAt: expect.any(String),
       updatedAt: expect.any(String),
     });
+    expect(mockPrismaService['db']).toHaveLength(1);
   });
 
   it('should find store by id and userId', async () => {
@@ -65,12 +50,10 @@ describe('PrismaStoreRepository', () => {
       id: mockStoreId,
       name: 'Store',
       userId: mockUserId,
-      createdAt: new Date().toISOString(),
-      updatedAt: new Date().toISOString(),
     };
-    jest
-      .spyOn<any, any>(mockPrismaService.store, 'findFirst')
-      .mockImplementation(() => Promise.resolve(mockStore));
+    mockPrismaService.store.create({ data: mockStore });
+
+    jest.spyOn<any, any>(mockPrismaService.store, 'findFirst');
 
     const store = await repository.get(mockUserId, mockStoreId);
     expect(mockPrismaService.store.findFirst).toHaveBeenCalledWith({
@@ -79,7 +62,11 @@ describe('PrismaStoreRepository', () => {
         userId: mockUserId,
       },
     });
-    expect(store).toMatchObject(mockStore);
+    expect(store).toMatchObject({
+      ...mockStore,
+      createdAt: expect.any(String),
+      updatedAt: expect.any(String),
+    });
   });
 
   it('should find store by userId', async () => {
@@ -88,12 +75,13 @@ describe('PrismaStoreRepository', () => {
       id: randomUUID(),
       name: 'Store',
       userId: mockUserId,
-      createdAt: new Date().toISOString(),
-      updatedAt: new Date().toISOString(),
     };
-    jest
-      .spyOn<any, any>(mockPrismaService.store, 'findFirst')
-      .mockImplementation(() => Promise.resolve(mockStore));
+    mockPrismaService.store.create({ data: mockStore });
+    mockPrismaService.store.create({
+      data: { ...mockStore, userId: randomUUID() },
+    });
+
+    jest.spyOn<any, any>(mockPrismaService.store, 'findFirst');
 
     const store = await repository.getByUserId(mockUserId);
     expect(mockPrismaService.store.findFirst).toHaveBeenCalledWith({
@@ -110,12 +98,12 @@ describe('PrismaStoreRepository', () => {
       id: randomUUID(),
       name: `Store ${index + 1}`,
       userId: mockUserId,
-      createdAt: new Date().toISOString(),
-      updatedAt: new Date().toISOString(),
     }));
-    jest
-      .spyOn<any, any>(mockPrismaService.store, 'findMany')
-      .mockImplementation(() => Promise.resolve(mockStores));
+    mockStores.forEach((store) =>
+      mockPrismaService.store.create({ data: store }),
+    );
+
+    jest.spyOn<any, any>(mockPrismaService.store, 'findMany');
 
     const stores = await repository.getAllUserStores(mockUserId);
     expect(mockPrismaService.store.findMany).toHaveBeenCalledWith({
@@ -123,7 +111,13 @@ describe('PrismaStoreRepository', () => {
         userId: mockUserId,
       },
     });
-    expect(stores).toMatchObject(mockStores);
+    expect(stores).toMatchObject(
+      mockStores.map((store) => ({
+        ...store,
+        createdAt: expect.any(String),
+        updatedAt: expect.any(String),
+      })),
+    );
   });
 
   it('should update store by id and userId', async () => {
@@ -134,12 +128,10 @@ describe('PrismaStoreRepository', () => {
       id: mockStoreId,
       name: mockNewStoreName,
       userId: mockUserId,
-      createdAt: new Date().toISOString(),
-      updatedAt: new Date().toISOString(),
     };
-    jest
-      .spyOn<any, any>(mockPrismaService.store, 'update')
-      .mockImplementation(() => Promise.resolve(mockStore));
+    mockPrismaService.store.create({ data: mockStore });
+
+    jest.spyOn<any, any>(mockPrismaService.store, 'update');
 
     const store = await repository.update(
       mockUserId,
@@ -165,12 +157,10 @@ describe('PrismaStoreRepository', () => {
       id: mockStoreId,
       name: 'Store name',
       userId: mockUserId,
-      createdAt: new Date().toISOString(),
-      updatedAt: new Date().toISOString(),
     };
-    jest
-      .spyOn<any, any>(mockPrismaService.store, 'delete')
-      .mockImplementation(() => Promise.resolve(mockStore));
+    mockPrismaService.store.create({ data: mockStore });
+
+    jest.spyOn<any, any>(mockPrismaService.store, 'delete');
 
     const store = await repository.delete(mockUserId, mockStoreId);
     expect(mockPrismaService.store.delete).toHaveBeenCalledWith({
@@ -180,5 +170,6 @@ describe('PrismaStoreRepository', () => {
       },
     });
     expect(store).toMatchObject(mockStore);
+    expect(mockPrismaService['db']).toHaveLength(0);
   });
 });
