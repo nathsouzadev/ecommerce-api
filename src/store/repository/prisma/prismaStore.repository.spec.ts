@@ -21,7 +21,7 @@ describe('PrismaStoreRepository', () => {
 
     repository = module.get<PrismaStoreRepository>(PrismaStoreRepository);
     mockPrismaService = module.get<PrismaService>(PrismaService);
-    mockPrismaService['reset']()
+    mockPrismaService['reset']();
   });
 
   it('should create store', async () => {

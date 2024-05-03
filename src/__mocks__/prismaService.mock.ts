@@ -3,7 +3,7 @@ import { randomUUID } from 'crypto';
 
 export class MockPrismaService {
   private db: Store[] = [];
-  reset = () => this.db = [];
+  reset = () => (this.db = []);
   store = {
     create: (args: { data: { name: string; userId: string; id?: string } }) => {
       const store = {

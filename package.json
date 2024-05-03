@@ -18,7 +18,7 @@
     "test:watch": "jest --watch",
     "test:cov": "jest --coverage",
     "test:debug": "node --inspect-brk -r tsconfig-paths/register -r ts-node/register node_modules/.bin/jest --runInBand",
-    "test:e2e": "jest --config ./test/jest-e2e.json",
+    "test:e2e": "npm run clear:db && jest --config ./test/jest-e2e.json",
     "db": "docker-compose up -d",
     "seed:db": "npx prisma db seed",
     "clear:db": "ts-node ./test/configDb.ts",
