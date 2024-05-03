@@ -7,15 +7,15 @@ import {
   Patch,
   Delete,
 } from '@nestjs/common';
-import { CreateStoreDto } from './dto/create-store.dto';
+import { CreateStoreDto } from '../dto/create-store.dto';
 import {
   ApiCreatedResponse,
   ApiNotFoundResponse,
   ApiOkResponse,
 } from '@nestjs/swagger';
 import { randomUUID } from 'crypto';
-import { UpdateStoreDto } from './dto/update-store.dto';
-import { StoreService } from './service/store.service';
+import { UpdateStoreDto } from '../dto/update-store.dto';
+import { StoreService } from '../service/store.service';
 
 @Controller()
 export class StoreController {

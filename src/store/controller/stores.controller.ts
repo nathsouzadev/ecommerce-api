@@ -1,7 +1,7 @@
 import { Controller, Param, Get } from '@nestjs/common';
 import { ApiNotFoundResponse, ApiOkResponse } from '@nestjs/swagger';
 import { randomUUID } from 'crypto';
-import { StoreService } from './service/store.service';
+import { StoreService } from '../service/store.service';
 
 @Controller()
 export class StoresController {

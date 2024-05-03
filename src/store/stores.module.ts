@@ -3,7 +3,7 @@ import { StoreService } from './service/store.service';
 import { PrismaService } from '../config/prisma/prisma.service';
 import { StoreRepository } from './repository/store.repository';
 import { PrismaStoreRepository } from './repository/prisma/prismaStore.repository';
-import { StoresController } from './stores.controller';
+import { StoresController } from './controller/stores.controller';
 
 @Module({
   controllers: [StoresController],
