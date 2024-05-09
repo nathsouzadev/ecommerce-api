@@ -21,6 +21,7 @@ describe('StoreService', () => {
             getAllUserStores: jest.fn(),
             update: jest.fn(),
             delete: jest.fn(),
+            getByIdAndUserId: jest.fn(),
           },
         },
       ],
@@ -47,6 +48,7 @@ describe('StoreService', () => {
     );
 
     const store = await service.create(mockStore);
+    expect(mockStoreRepository.create).toHaveBeenCalledWith(mockStore);
     expect(store).toMatchObject({
       ...mockStore,
       id: expect.any(String),
@@ -71,6 +73,7 @@ describe('StoreService', () => {
       .mockImplementation(() => Promise.resolve(mockStore));
 
     const store = await service.get(userId, storeId);
+    expect(mockStoreRepository.get).toHaveBeenCalledWith(userId, storeId);
     expect(store).toMatchObject(mockStore);
   });
 
@@ -102,6 +105,7 @@ describe('StoreService', () => {
       .mockImplementation(() => Promise.resolve(mockStore));
 
     const store = await service.getByUserId(userId);
+    expect(mockStoreRepository.getByUserId).toHaveBeenCalledWith(userId);
     expect(store).toMatchObject(mockStore);
   });
 
@@ -168,6 +172,12 @@ describe('StoreService', () => {
       .mockImplementation(() => Promise.resolve(mockStore));
 
     const store = await service.update(userId, storeId, storeName);
+    expect(mockStoreRepository.get).toHaveBeenCalledWith(userId, storeId);
+    expect(mockStoreRepository.update).toHaveBeenCalledWith(
+      userId,
+      storeId,
+      storeName,
+    );
     expect(store).toMatchObject(mockStore);
   });
 
@@ -201,6 +211,7 @@ describe('StoreService', () => {
       .mockImplementation(() => Promise.resolve(mockStore));
 
     const store = await service.delete(userId, storeId);
+    expect(mockStoreRepository.delete).toHaveBeenCalledWith(userId, storeId);
     expect(store).toMatchObject({ deleted: { store: mockStore } });
   });
 

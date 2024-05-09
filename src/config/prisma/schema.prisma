@@ -20,12 +20,12 @@ model Store {
   createdAt DateTime @default(now()) @map("created_at")
   updatedAt DateTime @updatedAt @map("updated_at")
 
-  bills BillBoard[]
+  bills Billboard[]
 
   @@map("stores")
 }
 
-model BillBoard {
+model Billboard {
   id        String   @id @default(uuid())
   storeId   String   @map("store_id")
   store     Store    @relation(fields: [storeId], references: [id])
@@ -35,5 +35,5 @@ model BillBoard {
   updatedAt DateTime @updatedAt @map("updated_at")
 
   @@index([storeId])
-  @@map("bill_boards")
+  @@map("billboards")
 }

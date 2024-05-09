@@ -1,8 +1,10 @@
-import { Store } from '@prisma/client';
 import { randomUUID } from 'crypto';
 
 export class MockPrismaService {
-  private db: Store[] = [];
+  protected db: any[] = [];
+  protected filterKeys = (data: any, entity: any) =>
+    Object.keys(data).every((key) => entity[key] === data[key]);
+
   reset = () => (this.db = []);
   store = {
     create: (args: { data: { name: string; userId: string; id?: string } }) => {
@@ -20,9 +22,7 @@ export class MockPrismaService {
       };
     },
     findFirst: (args: { where: any }) => {
-      const store = this.db.find((store) =>
-        Object.keys(args.where).every((key) => store[key] === args.where[key]),
-      );
+      const store = this.db.find((store) => this.filterKeys(args.where, store));
 
       return store
         ? {
@@ -34,7 +34,7 @@ export class MockPrismaService {
     },
     findMany: (args: { where: any }) => {
       const stores = this.db.filter((store) =>
-        Object.keys(args.where).every((key) => store[key] === args.where[key]),
+        this.filterKeys(args.where, store),
       );
       return stores.length > 0
         ? stores.map((store) => ({
@@ -46,7 +46,7 @@ export class MockPrismaService {
     },
     update: (args: { where: any; data: any }) => {
       const storeIndex = this.db.findIndex((store) =>
-        Object.keys(args.where).every((key) => store[key] === args.where[key]),
+        this.filterKeys(args.where, store),
       );
 
       if (storeIndex === -1) return null;
@@ -65,7 +65,7 @@ export class MockPrismaService {
     },
     delete: (args: { where: any; data: any }) => {
       const storeIndex = this.db.findIndex((store) =>
-        Object.keys(args.where).every((key) => store[key] === args.where[key]),
+        this.filterKeys(args.where, store),
       );
 
       if (storeIndex === -1) return null;
@@ -77,6 +77,24 @@ export class MockPrismaService {
         ...store,
         createdAt: store.createdAt.toISOString(),
         updatedAt: store.updatedAt.toISOString(),
+      };
+    },
+  };
+  billboard = {
+    create: (args: {
+      data: { label: string; imageUrl: string; storeId: string };
+    }) => {
+      const billboard = {
+        ...args.data,
+        id: randomUUID(),
+        createdAt: new Date(),
+        updatedAt: new Date(),
+      };
+      this.db.push(billboard);
+      return {
+        ...billboard,
+        createdAt: billboard.createdAt.toISOString(),
+        updatedAt: billboard.updatedAt.toISOString(),
       };
     },
   };
