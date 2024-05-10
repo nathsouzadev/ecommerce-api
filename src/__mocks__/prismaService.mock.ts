@@ -2,7 +2,7 @@ import { randomUUID } from 'crypto';
 
 export class MockPrismaService {
   protected db: any[] = [];
-  protected filterKeys = (data: any, entity: any) =>
+  private filterKeys = (data: any, entity: any) =>
     Object.keys(data).every((key) => entity[key] === data[key]);
 
   reset = () => (this.db = []);
@@ -118,6 +118,25 @@ export class MockPrismaService {
 
       const billboard = this.db[billboardIndex];
       this.db.splice(billboardIndex, 1);
+
+      return {
+        ...billboard,
+        createdAt: billboard.createdAt.toISOString(),
+        updatedAt: billboard.updatedAt.toISOString(),
+      };
+    },
+    update: (args: { where: any; data: any }) => {
+      const billboardIndex = this.db.findIndex((billboard) =>
+        this.filterKeys(args.where, billboard),
+      );
+
+      if (billboardIndex === -1) return null;
+
+      const billboard = {
+        ...this.db[billboardIndex],
+        ...args.data,
+      };
+      this.db[billboardIndex] = billboard;
 
       return {
         ...billboard,

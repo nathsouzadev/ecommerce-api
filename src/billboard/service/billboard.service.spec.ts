@@ -20,6 +20,7 @@ describe('BillboardService', () => {
             create: jest.fn(),
             getAll: jest.fn(),
             delete: jest.fn(),
+            update: jest.fn(),
           },
         },
         {
@@ -264,5 +265,135 @@ describe('BillboardService', () => {
         userId: mockUserId,
       }),
     ).rejects.toThrow(new NotFoundException('Billboard not found'));
+  });
+
+  it('should update billboard', async () => {
+    const mockUserId = randomUUID();
+    const mockStoreId = randomUUID();
+    const mockBillboardId = randomUUID();
+    const mockUpdateBillboard = {
+      label: 'Billboard Updated',
+      imageUrl: 'https://example.com/image-updated.jpg',
+    };
+
+    jest.spyOn(mockStoreService, 'get').mockImplementation(() =>
+      Promise.resolve({
+        id: mockStoreId,
+        userId: mockUserId,
+        name: 'Store',
+        createdAt: new Date(),
+        updatedAt: new Date(),
+      }),
+    );
+    jest
+      .spyOn<any, any>(mockBillboardRepository, 'update')
+      .mockImplementation(() =>
+        Promise.resolve({
+          id: mockBillboardId,
+          label: 'Billboard Updated',
+          imageUrl: 'https://example.com/image-updated.jpg',
+          storeId: mockStoreId,
+          createdAt: new Date().toISOString(),
+          updatedAt: new Date().toISOString(),
+        }),
+      );
+
+    const billboard = await service.update({
+      id: mockBillboardId,
+      storeId: mockStoreId,
+      userId: mockUserId,
+      ...mockUpdateBillboard,
+    });
+    expect(mockStoreService.get).toHaveBeenCalledWith(mockUserId, mockStoreId);
+    expect(mockBillboardRepository.update).toHaveBeenCalledWith({
+      id: mockBillboardId,
+      storeId: mockStoreId,
+      ...mockUpdateBillboard,
+    });
+    expect(billboard).toMatchObject({
+      billboard: {
+        id: mockBillboardId,
+        label: 'Billboard Updated',
+        imageUrl: 'https://example.com/image-updated.jpg',
+        storeId: mockStoreId,
+        createdAt: expect.any(String),
+        updatedAt: expect.any(String),
+      },
+    });
+  });
+
+  it('throw error if try update billboard with store does not exists', async () => {
+    const mockUserId = randomUUID();
+    const mockStoreId = randomUUID();
+    const mockBillboardId = randomUUID();
+    const mockUpdateBillboard = {
+      label: 'Billboard Updated',
+      imageUrl: 'https://example.com/image-updated.jpg',
+    };
+
+    jest
+      .spyOn(mockStoreService, 'get')
+      .mockImplementation(() =>
+        Promise.reject(new NotFoundException('Store not found')),
+      );
+
+    await expect(
+      service.update({
+        id: mockBillboardId,
+        storeId: mockStoreId,
+        userId: mockUserId,
+        ...mockUpdateBillboard,
+      }),
+    ).rejects.toThrow(new NotFoundException('Store not found'));
+    expect(mockStoreService.get).toHaveBeenCalledWith(mockUserId, mockStoreId);
+    expect(mockBillboardRepository.update).not.toHaveBeenCalled();
+  });
+
+  it('throw error if try update billboard fail', async () => {
+    const mockUserId = randomUUID();
+    const mockStoreId = randomUUID();
+    const mockBillboardId = randomUUID();
+    const mockUpdateBillboard = {
+      label: 'Billboard Updated',
+      imageUrl: 'https://example.com/image-updated.jpg',
+    };
+
+    jest.spyOn(mockStoreService, 'get').mockImplementation(() =>
+      Promise.resolve({
+        id: mockStoreId,
+        userId: mockUserId,
+        name: 'Store',
+        createdAt: new Date(),
+        updatedAt: new Date(),
+      }),
+    );
+    jest
+      .spyOn<any, any>(mockBillboardRepository, 'update')
+      .mockImplementation(() =>
+        Promise.reject({
+          clientVersion: '5.13.0',
+          code: 'P2025',
+          meta: {
+            modelName: 'Billboard',
+            cause: 'Record to update not found.',
+          },
+          name: 'PrismaClientKnownRequestError',
+        }),
+      );
+
+    await expect(
+      service.update({
+        id: mockBillboardId,
+        storeId: mockStoreId,
+        userId: mockUserId,
+        ...mockUpdateBillboard,
+      }),
+    ).rejects.toThrow(new Error('Record to update not found.'));
+    expect(mockStoreService.get).toHaveBeenCalledWith(mockUserId, mockStoreId);
+    expect(mockBillboardRepository.update).toHaveBeenCalledWith({
+      id: mockBillboardId,
+      storeId: mockStoreId,
+      ...mockUpdateBillboard,
+    });
   });
 });

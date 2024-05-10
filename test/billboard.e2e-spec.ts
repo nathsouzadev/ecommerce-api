@@ -313,4 +313,110 @@ describe('BillboardController (e2e)', () => {
         });
       });
   });
+
+  it('should update billboard', async () => {
+    const userId = randomUUID();
+    const storeId = randomUUID();
+
+    await prismadb.store.create({
+      data: {
+        id: storeId,
+        userId,
+        name: 'store',
+      },
+    });
+
+    const billboard = await prismadb.billboard.create({
+      data: {
+        label: 'store1',
+        imageUrl: 'https://example.com/image.jpg',
+        storeId,
+      },
+    });
+
+    return request(app.getHttpServer())
+      .patch(`/api/user/${userId}/store/${storeId}/billboard/${billboard.id}`)
+      .send({
+        label: 'store2',
+        imageUrl: 'https://example.com/image.jpg',
+      })
+      .expect(200)
+      .then(async (response) => {
+        expect(response.body).toMatchObject({
+          billboard: {
+            id: expect.any(String),
+            label: 'store2',
+            imageUrl: 'https://example.com/image.jpg',
+            storeId,
+            createdAt: expect.any(String),
+            updatedAt: expect.any(String),
+          },
+        });
+
+        await prismadb.billboard.delete({
+          where: {
+            id: response.body.billboard.id,
+          },
+        });
+
+        await prismadb.store.delete({
+          where: {
+            id: storeId,
+          },
+        });
+      });
+  });
+
+  it('return a error if try update billboard with store does not exists', async () => {
+    const userId = randomUUID();
+    const storeId = randomUUID();
+    const billboardId = randomUUID();
+
+    return request(app.getHttpServer())
+      .patch(`/api/user/${userId}/store/${storeId}/billboard/${billboardId}`)
+      .send({
+        label: 'store2',
+        imageUrl: 'https://example.com/image.jpg',
+      })
+      .expect(404)
+      .then(async (response) => {
+        expect(response.body).toMatchObject({
+          statusCode: 404,
+          message: 'Store not found',
+        });
+      });
+  });
+
+  it('return a error if try update billboard fail', async () => {
+    const userId = randomUUID();
+    const storeId = randomUUID();
+
+    await prismadb.store.create({
+      data: {
+        id: storeId,
+        userId,
+        name: 'store',
+      },
+    });
+
+    return request(app.getHttpServer())
+      .patch(`/api/user/${userId}/store/${storeId}/billboard/${randomUUID()}`)
+      .send({
+        label: 'store2',
+        imageUrl: 'https://example.com/image.jpg',
+      })
+      .expect(404)
+      .then(async (response) => {
+        expect(response.body).toMatchObject({
+          statusCode: 404,
+          message: 'Record to update not found.',
+        });
+
+        await prismadb.store.delete({
+          where: {
+            id: storeId,
+          },
+        });
+      });
+  });
 });

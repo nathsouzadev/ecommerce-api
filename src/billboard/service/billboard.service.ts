@@ -4,10 +4,10 @@ import {
   UnauthorizedException,
 } from '@nestjs/common';
 import { CreateBillboardDto } from '../dto/create-billboard.dto';
-import { UpdateBillboardDto } from '../dto/update-billboard.dto';
 import { StoreService } from '../../store/service/store.service';
 import { Billboard } from '@prisma/client';
 import { BillboardRepository } from '../repository/billboards.repository';
+import { UpdateBillboardDataModel } from '../models/update-billboard.model';
 
 @Injectable()
 export class BillboardService {
@@ -53,7 +53,15 @@ export class BillboardService {
     return billboards;
   };
 
-  delete = async (data: { id: string; storeId: string; userId: string }) => {
+  delete = async (data: {
+    id: string;
+    storeId: string;
+    userId: string;
+  }): Promise<{
+    deleted: {
+      billboard: Billboard;
+    };
+  }> => {
     try {
       const { id, storeId, userId } = data;
 
@@ -70,11 +78,23 @@ export class BillboardService {
     }
   };
 
-  findOne(id: number) {
-    return `This action returns a #${id} billboard`;
-  }
+  update = async (data: UpdateBillboardDataModel) => {
+    const { id, userId, storeId, label, imageUrl } = data;
 
-  update(id: number, updateBillboardDto: UpdateBillboardDto) {
-    return `This action updates a #${id} billboard`;
-  }
+    await this.validateStore(userId, storeId);
+
+    try {
+      const billboard = await this.billboardRepository.update({
+        id,
+        label,
+        imageUrl,
+        storeId,
+      });
+
+      return { billboard };
+    } catch (error) {
+      console.log(error);
+      throw new NotFoundException(error.meta.cause);
+    }
+  };
 }

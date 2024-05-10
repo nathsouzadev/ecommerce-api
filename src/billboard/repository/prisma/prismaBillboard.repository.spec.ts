@@ -105,4 +105,39 @@ describe('PrismaBillboardRepository', () => {
     });
     expect(mockPrismaService['db']).toHaveLength(0);
   });
+
+  it('should be update billboard with id and storeId', async () => {
+    const mockStoreId = randomUUID();
+    const mockBillboardId = randomUUID();
+    mockPrismaService.billboard.create({
+      data: {
+        id: mockBillboardId,
+        label: 'Test Billboard',
+        imageUrl: 'https://example.com/image.jpg',
+        storeId: mockStoreId,
+      },
+    });
+
+    const updateBillboard = {
+      label: 'Test Billboard Updated',
+      imageUrl: 'https://example.com/image-updated.jpg',
+    };
+    jest.spyOn<any, any>(mockPrismaService.billboard, 'update');
+
+    const billboard = await repository.update({
+      id: mockBillboardId,
+      storeId: mockStoreId,
+      ...updateBillboard,
+    });
+    expect(mockPrismaService.billboard.update).toHaveBeenCalledWith({
+      where: { id: mockBillboardId, storeId: mockStoreId },
+      data: updateBillboard,
+    });
+    expect(billboard).toMatchObject({
+      ...updateBillboard,
+      id: expect.any(String),
+      createdAt: expect.any(String),
+      updatedAt: expect.any(String),
+    });
+  });
 });

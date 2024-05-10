@@ -13,6 +13,7 @@ import { UpdateBillboardDto } from './dto/update-billboard.dto';
 import {
   ApiCreatedResponse,
   ApiNotFoundResponse,
+  ApiOkResponse,
   ApiUnauthorizedResponse,
 } from '@nestjs/swagger';
 import { randomUUID } from 'crypto';
@@ -96,17 +97,45 @@ export class BillboardController {
     return { billboards };
   }
 
-  @Get(':id')
-  findOne(@Param('id') id: string) {
-    return this.billboardService.findOne(+id);
-  }
-
+  @ApiOkResponse({
+    description: 'Return all billboards with storeId',
+    schema: {
+      example: {
+        billboard: {
+          id: randomUUID(),
+          storeId: randomUUID(),
+          label: 'Store 1',
+          imageUrl: 'https://example.com/image.jpg',
+          createdAt: new Date().toISOString(),
+          updatedAt: new Date().toISOString(),
+        },
+      },
+    },
+  })
+  @ApiNotFoundResponse({
+    description: 'Not found billboards',
+    schema: {
+      example: {
+        statusCode: 404,
+        message: 'Record to update not found.',
+      },
+    },
+  })
   @Patch(':id')
-  update(
-    @Param('id') id: string,
+  async update(
     @Body() updateBillboardDto: UpdateBillboardDto,
+    @Param('userId') userId: string,
+    @Param('storeId') storeId: string,
+    @Param('id') id: string,
   ) {
-    return this.billboardService.update(+id, updateBillboardDto);
+    const billboard = await this.billboardService.update({
+      ...updateBillboardDto,
+      userId,
+      storeId,
+      id,
+    });
+
+    return billboard;
   }
 
   @ApiCreatedResponse({
