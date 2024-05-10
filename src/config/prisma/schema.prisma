@@ -20,5 +20,20 @@ model Store {
   createdAt DateTime @default(now()) @map("created_at")
   updatedAt DateTime @updatedAt @map("updated_at")
 
+  bills Billboard[]
+
   @@map("stores")
+}
+
+model Billboard {
+  id        String   @id @default(uuid())
+  storeId   String   @map("store_id")
+  store     Store    @relation(fields: [storeId], references: [id])
+  label     String
+  imageUrl  String   @map("image_url")
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  @@index([storeId])
+  @@map("billboards")
 }

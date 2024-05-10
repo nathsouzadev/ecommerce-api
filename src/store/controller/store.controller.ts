@@ -7,19 +7,19 @@ import {
   Patch,
   Delete,
 } from '@nestjs/common';
-import { UserService } from './service/user.service';
-import { CreateStoreDto } from '../store/dto/create-store.dto';
+import { CreateStoreDto } from '../dto/create-store.dto';
 import {
   ApiCreatedResponse,
   ApiNotFoundResponse,
   ApiOkResponse,
 } from '@nestjs/swagger';
 import { randomUUID } from 'crypto';
-import { UpdateStoreDto } from '../store/dto/update-store.dto';
+import { UpdateStoreDto } from '../dto/update-store.dto';
+import { StoreService } from '../service/store.service';
 
 @Controller()
-export class UsersController {
-  constructor(private readonly usersService: UserService) {}
+export class StoreController {
+  constructor(private readonly storeService: StoreService) {}
 
   @ApiCreatedResponse({
     description: 'Store created',
@@ -35,12 +35,12 @@ export class UsersController {
       },
     },
   })
-  @Post(':userId/store')
+  @Post()
   async create(
     @Body() createStoreDto: CreateStoreDto,
     @Param('userId') userId: string,
   ) {
-    const store = await this.usersService.createStore({
+    const store = await this.storeService.create({
       ...createStoreDto,
       userId,
     });
@@ -70,12 +70,12 @@ export class UsersController {
       },
     },
   })
-  @Get(':userId/store/:storeId')
+  @Get(':storeId')
   async getStore(
     @Param('userId') userId: string,
     @Param('storeId') storeId: string,
   ) {
-    const store = await this.usersService.getStore(userId, storeId);
+    const store = await this.storeService.get(userId, storeId);
 
     return { store };
   }
@@ -103,41 +103,11 @@ export class UsersController {
       },
     },
   })
-  @Get(':userId/store')
+  @Get()
   async getStoreByUser(@Param('userId') userId: string) {
-    const store = await this.usersService.getStoreByUserId(userId);
+    const store = await this.storeService.getByUserId(userId);
 
     return { store };
-  }
-
-  @ApiOkResponse({
-    description: 'Get all stores of with userId',
-    schema: {
-      example: {
-        stores: Array.from({ length: 3 }, (_, index) => ({
-          id: randomUUID(),
-          name: `Store ${index + 1}`,
-          userId: 'user_2fYgThng9k3ZvaPI7g9fRWOYrWi',
-          createdAt: new Date().toISOString(),
-          updatedAt: new Date().toISOString(),
-        })),
-      },
-    },
-  })
-  @ApiNotFoundResponse({
-    description: 'Store not found',
-    schema: {
-      example: {
-        statusCode: 404,
-        message: 'Store not found',
-      },
-    },
-  })
-  @Get(':userId/stores')
-  async getStoresByUser(@Param('userId') userId: string) {
-    const stores = await this.usersService.getAllUserStores(userId);
-
-    return { stores };
   }
 
   @ApiOkResponse({
@@ -163,13 +133,13 @@ export class UsersController {
       },
     },
   })
-  @Patch(':userId/store/:storeId')
+  @Patch(':storeId')
   async updateStore(
     @Body() updateStoreDto: UpdateStoreDto,
     @Param('userId') userId: string,
     @Param('storeId') storeId: string,
   ) {
-    const store = await this.usersService.updateStore(
+    const store = await this.storeService.update(
       userId,
       storeId,
       updateStoreDto.name,
@@ -203,12 +173,12 @@ export class UsersController {
       },
     },
   })
-  @Delete(':userId/store/:storeId')
+  @Delete(':storeId')
   async deleteStore(
     @Param('userId') userId: string,
     @Param('storeId') storeId: string,
   ) {
-    const store = await this.usersService.deleteStore(userId, storeId);
+    const store = await this.storeService.delete(userId, storeId);
 
     return store;
   }

@@ -17,6 +17,10 @@ describe('StoreController (e2e)', () => {
     await app.init();
   });
 
+  afterEach(async () => {
+    await app.close();
+  });
+
   it('create store', async () => {
     const userId = randomUUID();
     return request(app.getHttpServer())
@@ -265,7 +269,7 @@ describe('StoreController (e2e)', () => {
       });
   });
 
-  it.only('should return 404 if try delete store does not exists', async () => {
+  it('should return 404 if try delete store does not exists', async () => {
     const userId = randomUUID();
     return request(app.getHttpServer())
       .delete(`/api/user/${userId}/store/${randomUUID()}`)

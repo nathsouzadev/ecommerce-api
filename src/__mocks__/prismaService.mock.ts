@@ -1,9 +1,11 @@
-import { Store } from '@prisma/client';
 import { randomUUID } from 'crypto';
 
 export class MockPrismaService {
-  private db: Store[] = [];
-  reset = () => this.db = [];
+  protected db: any[] = [];
+  private filterKeys = (data: any, entity: any) =>
+    Object.keys(data).every((key) => entity[key] === data[key]);
+
+  reset = () => (this.db = []);
   store = {
     create: (args: { data: { name: string; userId: string; id?: string } }) => {
       const store = {
@@ -20,9 +22,7 @@ export class MockPrismaService {
       };
     },
     findFirst: (args: { where: any }) => {
-      const store = this.db.find((store) =>
-        Object.keys(args.where).every((key) => store[key] === args.where[key]),
-      );
+      const store = this.db.find((store) => this.filterKeys(args.where, store));
 
       return store
         ? {
@@ -34,7 +34,7 @@ export class MockPrismaService {
     },
     findMany: (args: { where: any }) => {
       const stores = this.db.filter((store) =>
-        Object.keys(args.where).every((key) => store[key] === args.where[key]),
+        this.filterKeys(args.where, store),
       );
       return stores.length > 0
         ? stores.map((store) => ({
@@ -46,7 +46,7 @@ export class MockPrismaService {
     },
     update: (args: { where: any; data: any }) => {
       const storeIndex = this.db.findIndex((store) =>
-        Object.keys(args.where).every((key) => store[key] === args.where[key]),
+        this.filterKeys(args.where, store),
       );
 
       if (storeIndex === -1) return null;
@@ -65,7 +65,7 @@ export class MockPrismaService {
     },
     delete: (args: { where: any; data: any }) => {
       const storeIndex = this.db.findIndex((store) =>
-        Object.keys(args.where).every((key) => store[key] === args.where[key]),
+        this.filterKeys(args.where, store),
       );
 
       if (storeIndex === -1) return null;
@@ -77,6 +77,71 @@ export class MockPrismaService {
         ...store,
         createdAt: store.createdAt.toISOString(),
         updatedAt: store.updatedAt.toISOString(),
+      };
+    },
+  };
+  billboard = {
+    create: (args: {
+      data: { label: string; imageUrl: string; storeId: string; id?: string };
+    }) => {
+      const billboard = {
+        ...args.data,
+        id: args.data.id || randomUUID(),
+        createdAt: new Date(),
+        updatedAt: new Date(),
+      };
+      this.db.push(billboard);
+      return {
+        ...billboard,
+        createdAt: billboard.createdAt.toISOString(),
+        updatedAt: billboard.updatedAt.toISOString(),
+      };
+    },
+    findMany: (args: { where: any }) => {
+      const billboards = this.db.filter((billboard) =>
+        this.filterKeys(args.where, billboard),
+      );
+      return billboards.length > 0
+        ? billboards.map((billboard) => ({
+            ...billboard,
+            createdAt: billboard.createdAt.toISOString(),
+            updatedAt: billboard.updatedAt.toISOString(),
+          }))
+        : [];
+    },
+    delete: (args: { where: any }) => {
+      const billboardIndex = this.db.findIndex((billboard) =>
+        this.filterKeys(args.where, billboard),
+      );
+
+      if (billboardIndex === -1) return null;
+
+      const billboard = this.db[billboardIndex];
+      this.db.splice(billboardIndex, 1);
+
+      return {
+        ...billboard,
+        createdAt: billboard.createdAt.toISOString(),
+        updatedAt: billboard.updatedAt.toISOString(),
+      };
+    },
+    update: (args: { where: any; data: any }) => {
+      const billboardIndex = this.db.findIndex((billboard) =>
+        this.filterKeys(args.where, billboard),
+      );
+
+      if (billboardIndex === -1) return null;
+
+      const billboard = {
+        ...this.db[billboardIndex],
+        ...args.data,
+      };
+      this.db[billboardIndex] = billboard;
+
+      return {
+        ...billboard,
+        createdAt: billboard.createdAt.toISOString(),
+        updatedAt: billboard.updatedAt.toISOString(),
       };
     },
   };

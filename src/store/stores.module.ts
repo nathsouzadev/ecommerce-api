@@ -3,10 +3,10 @@ import { StoreService } from './service/store.service';
 import { PrismaService } from '../config/prisma/prisma.service';
 import { StoreRepository } from './repository/store.repository';
 import { PrismaStoreRepository } from './repository/prisma/prismaStore.repository';
-import { StoreController } from './controller/store.controller';
+import { StoresController } from './controller/stores.controller';
 
 @Module({
-  controllers: [StoreController],
+  controllers: [StoresController],
   providers: [
     StoreService,
     PrismaService,
@@ -16,4 +16,4 @@ import { StoreController } from './controller/store.controller';
     },
   ],
 })
-export class StoreModule {}
+export class StoresModule {}
