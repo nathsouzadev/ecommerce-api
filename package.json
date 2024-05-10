@@ -46,7 +46,7 @@
     "axios": "^1.6.8",
     "class-transformer": "^0.5.1",
     "class-validator": "^0.14.1",
-    "joi": "^17.13.0",
+    "joi": "^17.13.1",
     "ntl": "^5.1.0",
     "react-hot-toast": "^2.4.1",
     "reflect-metadata": "^0.2.0",
