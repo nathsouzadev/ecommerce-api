@@ -10,7 +10,11 @@ import {
 import { BillboardService } from './service/billboard.service';
 import { CreateBillboardDto } from './dto/create-billboard.dto';
 import { UpdateBillboardDto } from './dto/update-billboard.dto';
-import { ApiCreatedResponse, ApiUnauthorizedResponse } from '@nestjs/swagger';
+import {
+  ApiCreatedResponse,
+  ApiNotFoundResponse,
+  ApiUnauthorizedResponse,
+} from '@nestjs/swagger';
 import { randomUUID } from 'crypto';
 
 @Controller()
@@ -56,9 +60,37 @@ export class BillboardController {
     return billboard;
   }
 
+  @ApiCreatedResponse({
+    description: 'Return all billboards with storeId',
+    schema: {
+      example: {
+        billboards: [
+          {
+            id: randomUUID(),
+            storeId: randomUUID(),
+            label: 'Store 1',
+            imageUrl: 'https://example.com/image.jpg',
+            createdAt: new Date().toISOString(),
+            updatedAt: new Date().toISOString(),
+          },
+        ],
+      },
+    },
+  })
+  @ApiNotFoundResponse({
+    description: 'Not found billboards',
+    schema: {
+      example: {
+        statusCode: 404,
+        message: 'No billboards found',
+      },
+    },
+  })
   @Get()
-  findAll() {
-    return this.billboardService.findAll();
+  async findAll(@Param('storeId') storeId: string) {
+    const billboards = await this.billboardService.findAll(storeId);
+
+    return { billboards };
   }
 
   @Get(':id')

@@ -1,4 +1,8 @@
-import { Injectable, UnauthorizedException } from '@nestjs/common';
+import {
+  Injectable,
+  NotFoundException,
+  UnauthorizedException,
+} from '@nestjs/common';
 import { CreateBillboardDto } from '../dto/create-billboard.dto';
 import { UpdateBillboardDto } from '../dto/update-billboard.dto';
 import { StoreService } from '../../store/service/store.service';
@@ -34,9 +38,14 @@ export class BillboardService {
     }
   };
 
-  findAll() {
-    return 'This action returns all billboard';
-  }
+  findAll = async (storeId: string) => {
+    const billboards = await this.billboardRepository.getAll({ storeId });
+
+    if (billboards.length === 0)
+      throw new NotFoundException('No billboards found');
+
+    return billboards;
+  };
 
   findOne(id: number) {
     return `This action returns a #${id} billboard`;

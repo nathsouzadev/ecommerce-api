@@ -18,6 +18,7 @@ describe('BillboardService', () => {
           provide: BillboardRepository,
           useValue: {
             create: jest.fn(),
+            getAll: jest.fn(),
           },
         },
         {
@@ -104,6 +105,51 @@ describe('BillboardService', () => {
 
     await expect(service.create(mockBillboardData)).rejects.toThrow(
       new UnauthorizedException('Unauthorized'),
+    );
+  });
+
+  it('should get all billboards with storeId', async () => {
+    const mockStoreId = randomUUID();
+    const getMockBillboard = (label: string, storeId: string) => ({
+      id: randomUUID(),
+      label,
+      imageUrl: 'https://example.com/image.jpg',
+      storeId,
+      createdAt: new Date().toISOString(),
+      updatedAt: new Date().toISOString(),
+    });
+
+    const expectedBillboards = [
+      getMockBillboard('Test Billboard', mockStoreId),
+      getMockBillboard('Test Billboard 3', mockStoreId),
+    ];
+    jest
+      .spyOn<any, any>(mockBillboardRepository, 'getAll')
+      .mockImplementation(() => Promise.resolve(expectedBillboards));
+
+    const billboards = await service.findAll(mockStoreId);
+    expect(mockBillboardRepository.getAll).toHaveBeenCalledWith({
+      storeId: mockStoreId,
+    });
+    expect(billboards).toHaveLength(2);
+    expect(billboards).toMatchObject(
+      expectedBillboards.map((billboard) => ({
+        ...billboard,
+        id: expect.any(String),
+        createdAt: expect.any(String),
+        updatedAt: expect.any(String),
+      })),
+    );
+  });
+
+  it('throw error if no billboards found', async () => {
+    const mockStoreId = randomUUID();
+    jest
+      .spyOn<any, any>(mockBillboardRepository, 'getAll')
+      .mockImplementation(() => Promise.resolve([]));
+
+    await expect(service.findAll(mockStoreId)).rejects.toThrow(
+      new NotFoundException('No billboards found'),
     );
   });
 });

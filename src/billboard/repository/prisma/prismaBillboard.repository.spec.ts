@@ -46,4 +46,40 @@ describe('PrismaBillboardRepository', () => {
     });
     expect(mockPrismaService['db']).toHaveLength(1);
   });
+
+  it('should get all billboards with storeId', async () => {
+    const mockStoreId = randomUUID();
+    const getMockBillboard = (label: string, storeId: string) => ({
+      label,
+      imageUrl: 'https://example.com/image.jpg',
+      storeId,
+    });
+
+    const expectedBillboards = [
+      getMockBillboard('Test Billboard', mockStoreId),
+      getMockBillboard('Test Billboard 3', mockStoreId),
+    ];
+    for (const billboard of [
+      ...expectedBillboards,
+      getMockBillboard('Test Billboard 2', randomUUID()),
+    ]) {
+      mockPrismaService.billboard.create({ data: billboard });
+    }
+
+    jest.spyOn<any, any>(mockPrismaService.billboard, 'findMany');
+
+    const billboards = await repository.getAll({ storeId: mockStoreId });
+    expect(mockPrismaService.billboard.findMany).toHaveBeenCalledWith({
+      where: { storeId: mockStoreId },
+    });
+    expect(billboards).toHaveLength(2);
+    expect(billboards).toMatchObject(
+      expectedBillboards.map((billboard) => ({
+        ...billboard,
+        id: expect.any(String),
+        createdAt: expect.any(String),
+        updatedAt: expect.any(String),
+      })),
+    );
+  });
 });

@@ -97,5 +97,17 @@ export class MockPrismaService {
         updatedAt: billboard.updatedAt.toISOString(),
       };
     },
+    findMany: (args: { where: any }) => {
+      const billboards = this.db.filter((billboard) =>
+        this.filterKeys(args.where, billboard),
+      );
+      return billboards.length > 0
+        ? billboards.map((billboard) => ({
+            ...billboard,
+            createdAt: billboard.createdAt.toISOString(),
+            updatedAt: billboard.updatedAt.toISOString(),
+          }))
+        : [];
+    },
   };
 }

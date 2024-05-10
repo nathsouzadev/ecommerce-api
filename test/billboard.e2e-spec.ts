@@ -112,4 +112,79 @@ describe('BillboardController (e2e)', () => {
         });
       });
   });
+
+  it('get all billboards with storeId', async () => {
+    const userId = randomUUID();
+    const storeId = randomUUID();
+
+    await prismadb.store.create({
+      data: {
+        id: storeId,
+        userId,
+        name: 'store',
+      },
+    });
+
+    await prismadb.billboard.create({
+      data: {
+        label: 'store1',
+        imageUrl: 'https://example.com/image.jpg',
+        storeId,
+      },
+    });
+
+    await prismadb.billboard.create({
+      data: {
+        label: 'store2',
+        imageUrl: 'https://example.com/image.jpg',
+        storeId,
+      },
+    });
+
+    return request(app.getHttpServer())
+      .get(`/api/user/${userId}/store/${storeId}/billboard`)
+      .expect(200)
+      .then(async (response) => {
+        expect(response.body).toMatchObject({
+          billboards: [
+            {
+              id: expect.any(String),
+              label: 'store1',
+              imageUrl: 'https://example.com/image.jpg',
+              storeId,
+              createdAt: expect.any(String),
+              updatedAt: expect.any(String),
+            },
+            {
+              id: expect.any(String),
+              label: 'store2',
+              imageUrl: 'https://example.com/image.jpg',
+              storeId,
+              createdAt: expect.any(String),
+              updatedAt: expect.any(String),
+            },
+          ],
+        });
+
+        await prismadb.billboard.deleteMany({
+          where: {
+            storeId,
+          },
+        });
+      });
+  });
+
+  it('return a error if try get billboards with storeId does not exists', async () => {
+    const userId = randomUUID();
+    const storeId = randomUUID();
+    return request(app.getHttpServer())
+      .get(`/api/user/${userId}/store/${storeId}/billboard`)
+      .expect(404)
+      .then(async (response) => {
+        expect(response.body).toMatchObject({
+          statusCode: 404,
+          message: 'No billboards found',
+        });
+      });
+  });
 });

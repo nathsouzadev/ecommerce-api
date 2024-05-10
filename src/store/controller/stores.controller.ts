@@ -32,7 +32,6 @@ export class StoresController {
   })
   @Get()
   async getStoresByUser(@Param('userId') userId: string) {
-    console.log('HERE');
     const stores = await this.storeService.getAllUserStores(userId);
 
     return { stores };
