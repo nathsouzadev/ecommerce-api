@@ -87,8 +87,11 @@ export class BillboardController {
     },
   })
   @Get()
-  async findAll(@Param('storeId') storeId: string) {
-    const billboards = await this.billboardService.findAll(storeId);
+  async findAll(
+    @Param('userId') userId: string,
+    @Param('storeId') storeId: string,
+  ) {
+    const billboards = await this.billboardService.findAll({ userId, storeId });
 
     return { billboards };
   }
@@ -106,8 +109,46 @@ export class BillboardController {
     return this.billboardService.update(+id, updateBillboardDto);
   }
 
+  @ApiCreatedResponse({
+    description: 'Return all billboards with storeId',
+    schema: {
+      example: {
+        deleted: {
+          billboards: [
+            {
+              id: randomUUID(),
+              storeId: randomUUID(),
+              label: 'Store 1',
+              imageUrl: 'https://example.com/image.jpg',
+              createdAt: new Date().toISOString(),
+              updatedAt: new Date().toISOString(),
+            },
+          ],
+        },
+      },
+    },
+  })
+  @ApiNotFoundResponse({
+    description: 'Not found billboards',
+    schema: {
+      example: {
+        statusCode: 404,
+        message: 'Billboard not found',
+      },
+    },
+  })
   @Delete(':id')
-  remove(@Param('id') id: string) {
-    return this.billboardService.remove(+id);
+  async delete(
+    @Param('userId') userId: string,
+    @Param('storeId') storeId: string,
+    @Param('id') id: string,
+  ) {
+    const deleted = await this.billboardService.delete({
+      userId,
+      storeId,
+      id,
+    });
+
+    return deleted;
   }
 }

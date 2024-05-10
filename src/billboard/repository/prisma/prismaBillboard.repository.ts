@@ -15,4 +15,7 @@ export class PrismaBillboardRepository implements BillboardRepository {
     this.prisma.billboard.findMany({
       where: { storeId: data.storeId },
     });
+
+  delete = (data: { id: string; storeId: string }): Promise<Billboard> =>
+    this.prisma.billboard.delete({ where: data });
 }

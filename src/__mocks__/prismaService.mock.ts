@@ -82,11 +82,11 @@ export class MockPrismaService {
   };
   billboard = {
     create: (args: {
-      data: { label: string; imageUrl: string; storeId: string };
+      data: { label: string; imageUrl: string; storeId: string; id?: string };
     }) => {
       const billboard = {
         ...args.data,
-        id: randomUUID(),
+        id: args.data.id || randomUUID(),
         createdAt: new Date(),
         updatedAt: new Date(),
       };
@@ -108,6 +108,22 @@ export class MockPrismaService {
             updatedAt: billboard.updatedAt.toISOString(),
           }))
         : [];
+    },
+    delete: (args: { where: any }) => {
+      const billboardIndex = this.db.findIndex((billboard) =>
+        this.filterKeys(args.where, billboard),
+      );
+
+      if (billboardIndex === -1) return null;
+
+      const billboard = this.db[billboardIndex];
+      this.db.splice(billboardIndex, 1);
+
+      return {
+        ...billboard,
+        createdAt: billboard.createdAt.toISOString(),
+        updatedAt: billboard.updatedAt.toISOString(),
+      };
     },
   };
 }

@@ -17,6 +17,10 @@ describe('StoreController (e2e)', () => {
     await app.init();
   });
 
+  afterEach(async () => {
+    await app.close();
+  });
+
   it('create store', async () => {
     const userId = randomUUID();
     return request(app.getHttpServer())

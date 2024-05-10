@@ -16,6 +16,9 @@ export class BillboardService {
     private readonly storeService: StoreService,
   ) {}
 
+  private validateStore = async (userId: string, storeId: string) =>
+    await this.storeService.get(userId, storeId);
+
   create = async (
     data: CreateBillboardDto & {
       userId: string;
@@ -23,7 +26,7 @@ export class BillboardService {
     },
   ): Promise<{ billboard: Billboard }> => {
     try {
-      await this.storeService.get(data.userId, data.storeId);
+      await this.validateStore(data.userId, data.storeId);
 
       const billboard = await this.billboardRepository.create({
         label: data.label,
@@ -38,7 +41,10 @@ export class BillboardService {
     }
   };
 
-  findAll = async (storeId: string) => {
+  findAll = async (data: { userId: string; storeId: string }) => {
+    const { userId, storeId } = data;
+    await this.validateStore(userId, storeId);
+
     const billboards = await this.billboardRepository.getAll({ storeId });
 
     if (billboards.length === 0)
@@ -47,15 +53,28 @@ export class BillboardService {
     return billboards;
   };
 
+  delete = async (data: { id: string; storeId: string; userId: string }) => {
+    try {
+      const { id, storeId, userId } = data;
+
+      await this.validateStore(userId, storeId);
+
+      const billboard = await this.billboardRepository.delete({
+        id,
+        storeId,
+      });
+
+      return { deleted: { billboard } };
+    } catch (error) {
+      throw new NotFoundException('Billboard not found');
+    }
+  };
+
   findOne(id: number) {
     return `This action returns a #${id} billboard`;
   }
 
   update(id: number, updateBillboardDto: UpdateBillboardDto) {
     return `This action updates a #${id} billboard`;
-  }
-
-  remove(id: number) {
-    return `This action removes a #${id} billboard`;
   }
 }

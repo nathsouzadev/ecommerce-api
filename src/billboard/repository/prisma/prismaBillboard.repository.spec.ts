@@ -82,4 +82,27 @@ describe('PrismaBillboardRepository', () => {
       })),
     );
   });
+
+  it('should be delete billboard with id and storeId', async () => {
+    const mockStoreId = randomUUID();
+    const mockBillboardId = randomUUID();
+    mockPrismaService.billboard.create({
+      data: {
+        id: mockBillboardId,
+        label: 'Test Billboard',
+        imageUrl: 'https://example.com/image.jpg',
+        storeId: mockStoreId,
+      },
+    });
+    console.log(mockBillboardId);
+    console.log(mockPrismaService['db']);
+
+    jest.spyOn<any, any>(mockPrismaService.billboard, 'delete');
+
+    await repository.delete({ id: mockBillboardId, storeId: mockStoreId });
+    expect(mockPrismaService.billboard.delete).toHaveBeenCalledWith({
+      where: { id: mockBillboardId, storeId: mockStoreId },
+    });
+    expect(mockPrismaService['db']).toHaveLength(0);
+  });
 });
