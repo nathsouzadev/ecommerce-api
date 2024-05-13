@@ -180,4 +180,43 @@ export class BillboardController {
 
     return deleted;
   }
+
+  @ApiOkResponse({
+    description: 'Return billboard with storeId',
+    schema: {
+      example: {
+        billboard: {
+          id: randomUUID(),
+          storeId: randomUUID(),
+          label: 'Store 1',
+          imageUrl: 'https://example.com/image.jpg',
+          createdAt: new Date().toISOString(),
+          updatedAt: new Date().toISOString(),
+        },
+      },
+    },
+  })
+  @ApiNotFoundResponse({
+    description: 'Not found billboards',
+    schema: {
+      example: {
+        statusCode: 404,
+        message: 'Billboard not found',
+      },
+    },
+  })
+  @Get(':id')
+  async get(
+    @Param('userId') userId: string,
+    @Param('storeId') storeId: string,
+    @Param('id') id: string,
+  ) {
+    const billboard = await this.billboardService.get({
+      userId,
+      storeId,
+      id,
+    });
+
+    return billboard;
+  }
 }

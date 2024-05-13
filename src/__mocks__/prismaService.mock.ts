@@ -109,6 +109,19 @@ export class MockPrismaService {
           }))
         : [];
     },
+    findUnique: (args: { where: any }) => {
+      const billboard = this.db.find((billboard) =>
+        this.filterKeys(args.where, billboard),
+      );
+
+      return billboard
+        ? {
+            ...billboard,
+            createdAt: billboard.createdAt.toISOString(),
+            updatedAt: billboard.updatedAt.toISOString(),
+          }
+        : null;
+    },
     delete: (args: { where: any }) => {
       const billboardIndex = this.db.findIndex((billboard) =>
         this.filterKeys(args.where, billboard),

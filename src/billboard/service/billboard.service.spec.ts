@@ -21,6 +21,7 @@ describe('BillboardService', () => {
             getAll: jest.fn(),
             delete: jest.fn(),
             update: jest.fn(),
+            get: jest.fn(),
           },
         },
         {
@@ -394,6 +395,99 @@ describe('BillboardService', () => {
       id: mockBillboardId,
       storeId: mockStoreId,
       ...mockUpdateBillboard,
+    });
+  });
+
+  it('should get billboard with id and storeId', async () => {
+    const mockUserId = randomUUID();
+    const mockStoreId = randomUUID();
+    const mockBillboardId = randomUUID();
+    const mockBillboard = {
+      id: mockBillboardId,
+      label: 'Billboard',
+      imageUrl: 'https://example.com/image.jpg',
+      storeId: mockStoreId,
+    };
+
+    jest.spyOn(mockStoreService, 'get').mockImplementation(() =>
+      Promise.resolve({
+        id: mockStoreId,
+        userId: mockUserId,
+        name: 'Store',
+        createdAt: new Date(),
+        updatedAt: new Date(),
+      }),
+    );
+    jest
+      .spyOn<any, any>(mockBillboardRepository, 'get')
+      .mockImplementation(() => Promise.resolve(mockBillboard));
+
+    const billboard = await service.get({
+      id: mockBillboardId,
+      storeId: mockStoreId,
+      userId: mockUserId,
+    });
+    expect(mockStoreService.get).toHaveBeenCalledWith(mockUserId, mockStoreId);
+    expect(mockBillboardRepository.get).toHaveBeenCalledWith({
+      id: mockBillboardId,
+      storeId: mockStoreId,
+    });
+    expect(billboard).toMatchObject({
+      billboard: mockBillboard,
+    });
+  });
+
+  it('throw error if try get billboard with store does not exists', async () => {
+    const mockUserId = randomUUID();
+    const mockStoreId = randomUUID();
+    const mockBillboardId = randomUUID();
+
+    jest
+      .spyOn(mockStoreService, 'get')
+      .mockImplementation(() =>
+        Promise.reject(new NotFoundException('Store not found')),
+      );
+
+    await expect(
+      service.get({
+        id: mockBillboardId,
+        storeId: mockStoreId,
+        userId: mockUserId,
+      }),
+    ).rejects.toThrow(new NotFoundException('Store not found'));
+    expect(mockStoreService.get).toHaveBeenCalledWith(mockUserId, mockStoreId);
+    expect(mockBillboardRepository.get).not.toHaveBeenCalled();
+  });
+
+  it('throw error if try get billboard does not exists', async () => {
+    const mockUserId = randomUUID();
+    const mockStoreId = randomUUID();
+    const mockBillboardId = randomUUID();
+
+    jest.spyOn(mockStoreService, 'get').mockImplementation(() =>
+      Promise.resolve({
+        id: mockStoreId,
+        userId: mockUserId,
+        name: 'Store',
+        createdAt: new Date(),
+        updatedAt: new Date(),
+      }),
+    );
+    jest
+      .spyOn<any, any>(mockBillboardRepository, 'get')
+      .mockImplementation(() => Promise.resolve(null));
+
+    await expect(
+      service.get({
+        id: mockBillboardId,
+        storeId: mockStoreId,
+        userId: mockUserId,
+      }),
+    ).rejects.toThrow(new NotFoundException('Billboard not found'));
+    expect(mockStoreService.get).toHaveBeenCalledWith(mockUserId, mockStoreId);
+    expect(mockBillboardRepository.get).toHaveBeenCalledWith({
+      id: mockBillboardId,
+      storeId: mockStoreId,
     });
   });
 });
