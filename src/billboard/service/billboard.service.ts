@@ -97,4 +97,16 @@ export class BillboardService {
       throw new NotFoundException(error.meta.cause);
     }
   };
+
+  get = async (data: { id: string; storeId: string; userId: string }) => {
+    const { id, storeId, userId } = data;
+
+    await this.validateStore(userId, storeId);
+
+    const billboard = await this.billboardRepository.get({ id, storeId });
+
+    if (!billboard) throw new NotFoundException('Billboard not found');
+
+    return { billboard };
+  };
 }

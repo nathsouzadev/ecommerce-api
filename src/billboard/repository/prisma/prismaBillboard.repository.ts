@@ -24,4 +24,7 @@ export class PrismaBillboardRepository implements BillboardRepository {
     const { id, storeId, ...rest } = data;
     return this.prisma.billboard.update({ where: { id, storeId }, data: rest });
   };
+
+  get = async (data: { id: string; storeId: string }): Promise<Billboard> =>
+    this.prisma.billboard.findUnique({ where: data });
 }

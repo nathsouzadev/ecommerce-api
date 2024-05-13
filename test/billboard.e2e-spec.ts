@@ -419,4 +419,98 @@ describe('BillboardController (e2e)', () => {
         });
       });
   });
+
+  it('should return a billboard with storeId', async () => {
+    const userId = randomUUID();
+    const storeId = randomUUID();
+
+    await prismadb.store.create({
+      data: {
+        id: storeId,
+        userId,
+        name: 'store',
+      },
+    });
+
+    const billboard = await prismadb.billboard.create({
+      data: {
+        label: 'store1',
+        imageUrl: 'https://example.com/image.jpg',
+        storeId,
+      },
+    });
+
+    return request(app.getHttpServer())
+      .get(`/api/user/${userId}/store/${storeId}/billboard/${billboard.id}`)
+      .expect(200)
+      .then(async (response) => {
+        expect(response.body).toMatchObject({
+          billboard: {
+            id: expect.any(String),
+            label: 'store1',
+            imageUrl: 'https://example.com/image.jpg',
+            storeId,
+            createdAt: expect.any(String),
+            updatedAt: expect.any(String),
+          },
+        });
+
+        await prismadb.billboard.delete({
+          where: {
+            id: response.body.billboard.id,
+          },
+        });
+
+        await prismadb.store.delete({
+          where: {
+            id: storeId,
+          },
+        });
+      });
+  });
+
+  it('return a error if try get billboard does not exists', async () => {
+    const userId = randomUUID();
+    const storeId = randomUUID();
+
+    await prismadb.store.create({
+      data: {
+        id: storeId,
+        userId,
+        name: 'store',
+      },
+    });
+
+    return request(app.getHttpServer())
+      .get(`/api/user/${userId}/store/${storeId}/billboard/${randomUUID()}`)
+      .expect(404)
+      .then(async (response) => {
+        expect(response.body).toMatchObject({
+          statusCode: 404,
+          message: 'Billboard not found',
+        });
+
+        await prismadb.store.delete({
+          where: {
+            id: storeId,
+          },
+        });
+      });
+  });
+
+  it('return a error if try get billboard with store does not exists', async () => {
+    const userId = randomUUID();
+    const storeId = randomUUID();
+    const billboardId = randomUUID();
+
+    return request(app.getHttpServer())
+      .get(`/api/user/${userId}/store/${storeId}/billboard/${billboardId}`)
+      .expect(404)
+      .then(async (response) => {
+        expect(response.body).toMatchObject({
+          statusCode: 404,
+          message: 'Store not found',
+        });
+      });
+  });
 });

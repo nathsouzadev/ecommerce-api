@@ -10,4 +10,6 @@ export abstract class BillboardRepository {
   delete: (data: { id: string; storeId: string }) => Promise<Billboard>;
 
   update: (data: UpdateBillboardModel) => Promise<Billboard>;
+
+  get: (data: { id: string; storeId: string }) => Promise<Billboard>;
 }

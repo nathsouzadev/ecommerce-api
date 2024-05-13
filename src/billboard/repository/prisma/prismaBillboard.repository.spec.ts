@@ -140,4 +140,31 @@ describe('PrismaBillboardRepository', () => {
       updatedAt: expect.any(String),
     });
   });
+
+  it('should get billboard with id and storeId', async () => {
+    const mockStoreId = randomUUID();
+    const mockBillboardId = randomUUID();
+    const mockBillboard = {
+      id: mockBillboardId,
+      label: 'Test Billboard',
+      imageUrl: 'https://example.com/image.jpg',
+      storeId: mockStoreId,
+    };
+    mockPrismaService.billboard.create({ data: mockBillboard });
+
+    jest.spyOn<any, any>(mockPrismaService.billboard, 'findUnique');
+
+    const billboard = await repository.get({
+      id: mockBillboardId,
+      storeId: mockStoreId,
+    });
+    expect(mockPrismaService.billboard.findUnique).toHaveBeenCalledWith({
+      where: { id: mockBillboardId, storeId: mockStoreId },
+    });
+    expect(billboard).toMatchObject({
+      ...mockBillboard,
+      createdAt: expect.any(String),
+      updatedAt: expect.any(String),
+    });
+  });
 });
